@@ -1,0 +1,3316 @@
+{
+    "swagger": "2.0",
+    "x-sortMethodsBy": [
+      "path"
+    ],
+    "info": {
+      "title": "Model Rest Endpoints",
+      "description": "**Model Rest Endpoint List:**\n\n- Load Models\n- Convert to Model\n- Load versions of a Model\n- Load versions of a Model by Run Id\n- Fetch Metadata\n- Get Signature and Input Example\n- Update Staging Model Compute\n- Get Staging Model Logs\n- Stop Staging Model\n- Start Staging Model\n- Add Tag\n- Update Tag\n- Delete Tag\n- Update Notes\n- Promote to Production\n- Load Production Models\n- Update Scaling Policy\n- Stop Production Model\n- Start Production Model\n- Get Production Model Logs\n    \n\n**Common Response Fields:**\n\n| **Fields** | **Description** |\n| --- | --- |\n| id | Deployment ID of the entity |\n| creationDate | Creation Date of the entity |\n| lastModificationDate | Last Modification Date of the entity |\n| active | active = `true` means entity is active.  <br>active = `false` means entity is deleted. |",
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "http://{{host}}"
+      }
+    ],
+    "components": {
+      "securitySchemes": {
+        "basicAuth": {
+          "type": "http",
+          "scheme": "basic"
+        }
+      }
+    },
+    "security": [
+      {
+        "basicAuth": []
+      }
+    ],
+    "paths": {
+      "/api/model-deployment/": {
+        "get": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Load Models",
+          "description": "This request endpoint returns the list of all models registered in the system and their meta data.\n\n---\n\n**Response Fields:**\n\n| **Fields** | **Description** |\n| --- | --- |\n| id | Unique Identifier of a Model (model-id). |\n| name | The name of the model deployment. |\n| type | The type of the model deployment (Regression, Classification, etc.). |\n| description | A brief description of the model deployment. |\n| latestProductionVersion | The latest version of the model that has been deployed in production. |\n| latestStagingVersion | The latest version of the model that has been deployed in staging. |\n| activeProductionVersion | The active version of the model that is currently running in production. |\n| activeStagingVersion | The active version of the model that is currently running in staging. |\n| latestProdVersionStatus | The status of the latest version of the model running in production (ON/OFF). |\n| latestStagingVersionStatus | The status of the latest version of the model running in staging (ON/OFF). |",
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 13:54:15 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "347"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": [
+                    {
+                      "id": "85449c38-aa54-4238-9960-c07c979640a2",
+                      "creationDate": "2023-01-18T13:39:23.243+00:00",
+                      "lastModificationDate": "2023-01-18T13:39:23.243+00:00",
+                      "active": true,
+                      "name": "xgboost-model",
+                      "type": "Regression",
+                      "description": "This is a demo model deployment",
+                      "latestStagingVersion": "0.01",
+                      "activeStagingVersion": 0,
+                      "latestStagingVersionStatus": "ON"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Convert to Model",
+          "description": "---\n\nThis request endpoint packages a model as a self-contained docker image and stages it to a Kubernetes Cluster. After the model turns ON, a REST API endpoint will become available for execution.\n\n---\n\n**Request Payload Fields:**\n\n| **Fields** | **Description** |\n| --- | --- |\n| experimentName | The name of the experiment. |\n| runId | A unique identifier for the experiment run. |\n| deploymentGroupId | A unique identifier for the deployment group. |\n| deploymentGroupName | The name of the deployment group (Model Name). |\n| deploymentGroupType | The type of the deployment group (Regression, Classification, etc.). |\n| deploymentGroupDescription | A brief description of the deployment group. |\n| compute | An identifier for the compute resource. |\n| modelPath | Storage path of the model artifacts. |",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "experimentName": "credit-card-fraud",
+                    "runId": "93245429aa344699b6405606ed0d3e80",
+                    "deploymentGroupId": "7be4ec20-5a5e-42da-a119-a7e0ae897a9a",
+                    "deploymentGroupName": "credit-card-fraud",
+                    "deploymentGroupType": "Regression",
+                    "deploymentGroupDescription": "This is a demo model deployment",
+                    "compute": "eef59f03-a872-4988-9ad0-06a150215dbb",
+                    "modelPath": "s3://rml-model-artifacts/users/admin/5/93245429aa344699b6405606ed0d3e80/artifacts/model/"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Created",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 13:39:23 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "312"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "id": "718b951b-e88a-4c1d-844a-f933f98ce201",
+                    "creationDate": "2023-01-18T13:39:23.255+00:00",
+                    "lastModificationDate": "2023-01-18T13:39:23.255+00:00",
+                    "active": true,
+                    "actionType": "MODEL_CREATE",
+                    "entityType": "MODEL",
+                    "entityId": "6ea807a7-e5b6-4242-ad66-ef4af9a6a0f1",
+                    "message": "Starting model",
+                    "actionStatus": "PENDING"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/v2": {
+        "get": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Load Models V2",
+          "description": "This request endpoint returns the list of all models registered in the system and their meta data.\n\n---\n\n**Query Params:**\n\n| **Fields** | **Description** |\n| --- | --- |\n| page | Page Number. |\n| perPage | Records per Page. |\n| modelName | Text to search Model Name (Case Insensitive). |\n\n**Response Fields:**\n\n| **Fields** | **Description** |\n| --- | --- |\n| page | Page Number. |\n| perPage | Records per Page. |\n| total | Total number of records. |\n| totalPages | Number of total pages. |\n| id | Unique Identifier of a Model (model-id). |\n| name | The name of the model deployment. |\n| type | The type of the model deployment (Regression, Classification, etc.). |\n| description | A brief description of the model deployment. |\n| latestProductionVersion | The latest version of the model that has been deployed in production. |\n| latestStagingVersion | The latest version of the model that has been deployed in staging. |\n| activeProductionVersion | The active version of the model that is currently running in production. |\n| activeStagingVersion | The active version of the model that is currently running in staging. |\n| latestProdVersionStatus | The status of the latest version of the model running in production (ON/OFF). |\n| latestStagingVersionStatus | The status of the latest version of the model running in staging (ON/OFF). |",
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "page",
+              "in": "query",
+              "schema": {
+                "type": "integer"
+              },
+              "example": "1"
+            },
+            {
+              "name": "perPage",
+              "in": "query",
+              "schema": {
+                "type": "integer"
+              },
+              "example": "10"
+            },
+            {
+              "name": "modelName",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              },
+              "example": "xgboost"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "365"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Tue, 31 Jan 2023 14:32:20 GMT"
+                  }
+                },
+                "Keep-Alive": {
+                  "schema": {
+                    "type": "string",
+                    "example": "timeout=60"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "page": 1,
+                    "perPage": 10,
+                    "total": 1,
+                    "totalPages": 1,
+                    "data": [
+                      {
+                        "id": "95c6de65-3291-4f4b-8efd-8dfa7ffef4de",
+                        "creationDate": "2023-01-19T16:19:57.635+00:00",
+                        "lastModificationDate": "2023-01-19T16:19:57.635+00:00",
+                        "active": true,
+                        "name": "xgboost-model",
+                        "type": "Regression",
+                        "description": "This is a demo model deployment",
+                        "activeProductionVersions": 0,
+                        "activeStagingVersions": 0
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/{model-id}": {
+        "get": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Load versions of a Model",
+          "description": "This request endpoint returns the metadata of all versions of a given model and their staging & production details (REST API Endpoint, model path, etc.).\n\n---\n\n**Path Param:**\n\n`model-id`: Unique Identifier of a Model. Refer [Load Models](https://documenter.getpostman.com/view/8413266/2s8ZDVYiNN#899b7aa9-8a61-4843-badb-fd61aebd5fdc) API for the value of this field. Update value of this field in the environment variable to operate this API.\n\n**Response Fields:**\n\n- `modelVersion`: The version of the model that is being deployed.\n- `experimentName`: The name of the experiment.\n- `runId`: A unique identifier for the experiment run.\n- `user`: Information about the user who deployed the model.\n- `stagingModel`: Information about the staging model. It contains details such as model's id, active status, url, status (ON/OFF), compute details, deploymentName and last start time of the model.\n- `prodModel`: Information about the production model. It contains details such as model's id, active status, url, status (ON/OFF), compute details, deploymentName and last start time of the model.",
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "model-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 13:55:35 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "859"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": [
+                    {
+                      "id": "a252ea5f-737a-4b4b-aca2-22d518bf15a0",
+                      "creationDate": "2023-01-18T13:39:23.252+00:00",
+                      "lastModificationDate": "2023-01-18T13:39:23.252+00:00",
+                      "active": true,
+                      "versionName": "0.01",
+                      "experimentName": "zealous-cod-799",
+                      "runId": "83c54411e7854ff4832e3b366a82db52",
+                      "user": {
+                        "id": "622e7abd-bbce-4599-b18e-ea7e72a70b4f",
+                        "email": "tesla@ldap.forumsys.com"
+                      },
+                      "stagingModel": {
+                        "id": "6ea807a7-e5b6-4242-ad66-ef4af9a6a0f1",
+                        "creationDate": "2023-01-18T13:39:23.253+00:00",
+                        "lastModificationDate": "2023-01-18T13:42:09.892+00:00",
+                        "active": true,
+                        "url": "https://gpdmqm7.ostack.babyrocket.net/invocations",
+                        "status": "ON",
+                        "compute": {
+                          "id": "eef59f03-a872-4988-9ad0-06a150215dbb",
+                          "active": true,
+                          "name": "2C-4GB",
+                          "cpus": 2,
+                          "memory": 4096,
+                          "gpus": 0,
+                          "enabled": true
+                        },
+                        "deploymentName": "gpdmqm7"
+                      },
+                      "deploymentGroupId": "85449c38-aa54-4238-9960-c07c979640a2",
+                      "deploymentGroupName": "xgboost-model"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/model-by-run/{experiment-run-id}": {
+        "get": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Load versions of a Model by Run ID",
+          "description": "This request endpoint returns the details of a model for a given experiment run. It helps in avoiding duplicate registration of a model from a same experiment run. If no model was registered from the given run, response will be empty.\n\n---\n\n**Response Fields:**\n\n- `modelVersion`: The version of the model that is being deployed.\n- `experimentName`: The name of the experiment.\n- `runId`: A unique identifier for the experiment run.\n- `user`: Information about the user who is deploying the model.\n- `stagingModel`: Information about the staging model.\n- `deploymentGroupId`: A unique identifier for the deployment group.\n- `deploymentGroupName`: The name of the deployment group (Model Name).",
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "experiment-run-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 14:03:23 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "855"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": [
+                    {
+                      "id": "a252ea5f-737a-4b4b-aca2-22d518bf15a0",
+                      "creationDate": "2023-01-18T13:39:23.252+00:00",
+                      "lastModificationDate": "2023-01-18T13:39:23.252+00:00",
+                      "active": true,
+                      "versionName": "0.01",
+                      "experimentName": "zealous-cod-799",
+                      "runId": "83c54411e7854ff4832e3b366a82db52",
+                      "user": {
+                        "id": "622e7abd-bbce-4599-b18e-ea7e72a70b4f",
+                        "email": "tesla@ldap.forumsys.com"
+                      },
+                      "stagingModel": {
+                        "id": "6ea807a7-e5b6-4242-ad66-ef4af9a6a0f1",
+                        "creationDate": "2023-01-18T13:39:23.253+00:00",
+                        "lastModificationDate": "2023-01-18T13:42:09.892+00:00",
+                        "active": true,
+                        "url": "https://gpdmqm7.ostack.babyrocket.net/invocations",
+                        "status": "ON",
+                        "compute": {
+                          "id": "eef59f03-a872-4988-9ad0-06a150215dbb",
+                          "active": true,
+                          "name": "2C-4GB",
+                          "cpus": 2,
+                          "memory": 4096,
+                          "gpus": 0,
+                          "enabled": true
+                        },
+                        "deploymentName": "gpdmqm7"
+                      },
+                      "deploymentGroupId": "85449c38-aa54-4238-9960-c07c979640a2",
+                      "deploymentGroupName": "xgboost-model"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/metadata/{model-version-id}": {
+        "get": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Fetch Metadata",
+          "description": "Returns the notes, parameters, metrics, tags, artifacts path and files for a given model version id\n\n---\n\nThis endpoint returns the metadata of a model deployment by its id.\n\n- `notes`: Additional notes about the model deployment.\n- `metrics`: An array of key-value pairs representing the metrics of the model deployment.\n- `parameters`: An array of key-value pairs representing the parameters of the model deployment.\n- `tags`: An array of key-value pairs representing the tags of the model deployment.",
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "model-version-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "341"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Thu, 05 Jan 2023 14:57:54 GMT"
+                  }
+                },
+                "Keep-Alive": {
+                  "schema": {
+                    "type": "string",
+                    "example": "timeout=60"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "notes": "Notes",
+                    "metrics": [
+                      {
+                        "key": "accuracy",
+                        "value": "0.799"
+                      }
+                    ],
+                    "parameters": [
+                      {
+                        "key": "alpha",
+                        "value": "0.01"
+                      },
+                      {
+                        "key": "classifier",
+                        "value": "SGDClassifier"
+                      },
+                      {
+                        "key": "features",
+                        "value": "35788"
+                      },
+                      {
+                        "key": "samples",
+                        "value": "2257"
+                      },
+                      {
+                        "key": "use_idf",
+                        "value": "True"
+                      }
+                    ],
+                    "tags": [
+                      {
+                        "key": "Company",
+                        "value": "RocketML"
+                      },
+                      {
+                        "key": "Customer",
+                        "value": "Accertify"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/signature-and-input-example": {
+        "get": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Get Signature and Input Example",
+          "description": "Returns the model signature and input example for given mode version id. If model signature and input example were not logged during experiment run creation, it will return empty response\n\n---\n\nThis API returns the input example and signature of a deployed model. It takes in a query parameter `modelVersionId` which is the unique identifier of the model version and `prod` which is a boolean value indicating whether the model is in production or not. The input example is a json object with the column names and data of the input. The signature is a json object that describes the inputs and outputs of the model, including the name, type, and shape of the inputs and outputs. This information can be used to integrate the deployed model with other applications.",
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "modelVersionId",
+              "in": "query",
+              "schema": {
+                "type": "string"
+              },
+              "example": "{{model-version-id}}"
+            },
+            {
+              "name": "prod",
+              "in": "query",
+              "schema": {
+                "type": "boolean"
+              },
+              "example": "false"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "1984"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Fri, 20 Jan 2023 12:36:11 GMT"
+                  }
+                },
+                "Keep-Alive": {
+                  "schema": {
+                    "type": "string",
+                    "example": "timeout=60"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "signature": {
+                      "inputs": [
+                        {
+                          "name": "V0",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V1",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V2",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V3",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V4",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V5",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V6",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V7",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V8",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V9",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V10",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V11",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V12",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V13",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V14",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V15",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V16",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V17",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V18",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V19",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V20",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V21",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V22",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V23",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V24",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V25",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V26",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V27",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V28",
+                          "type": "double"
+                        },
+                        {
+                          "name": "V29",
+                          "type": "double"
+                        }
+                      ],
+                      "outputs": [
+                        {
+                          "type": "tensor",
+                          "tensor-spec": {
+                            "dtype": "int64",
+                            "shape": [
+                              -1
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "inputExample": {
+                      "columns": [
+                        "V0",
+                        "V1",
+                        "V2",
+                        "V3",
+                        "V4",
+                        "V5",
+                        "V6",
+                        "V7",
+                        "V8",
+                        "V9",
+                        "V10",
+                        "V11",
+                        "V12",
+                        "V13",
+                        "V14",
+                        "V15",
+                        "V16",
+                        "V17",
+                        "V18",
+                        "V19",
+                        "V20",
+                        "V21",
+                        "V22",
+                        "V23",
+                        "V24",
+                        "V25",
+                        "V26",
+                        "V27",
+                        "V28",
+                        "V29"
+                      ],
+                      "data": [
+                        [
+                          161919,
+                          1.94674666728168,
+                          -0.752525821492348,
+                          -1.35512953289131,
+                          -0.661629913230695,
+                          1.50282190770174,
+                          4.02493282673061,
+                          -1.47966148383909,
+                          1.13988021689572,
+                          1.40681871374813,
+                          -0.157402912660682,
+                          -0.113729190329599,
+                          0.510277474082635,
+                          0.0612577807353701,
+                          -0.0665551394957695,
+                          1.32870182050036,
+                          0.352513902823239,
+                          -0.76566982664618,
+                          0.141937536859382,
+                          -0.451364651514137,
+                          -0.134434695487417,
+                          0.0761965101986691,
+                          0.297536541043559,
+                          0.307914569497895,
+                          0.690980284177926,
+                          -0.350316231256655,
+                          -0.388907264903717,
+                          0.0776408382302655,
+                          -0.0322477642202041,
+                          7.32
+                        ]
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/{staging-model-id}/compute": {
+        "put": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Update Staging Model Compute",
+          "description": "Updates compute resources for a staging model\n\n---\n\nBody:\n\n- compute:\n    - id: (string) ID of the compute resource to be associated with the model",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "compute": {
+                      "id": "eef59f07-a872-4988-9ad0-06a150215dbb"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "staging-model-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "314"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Mon, 09 Jan 2023 12:53:24 GMT"
+                  }
+                },
+                "Keep-Alive": {
+                  "schema": {
+                    "type": "string",
+                    "example": "timeout=60"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "id": "257c85da-537c-4f6e-8277-13b0901aa5b8",
+                    "creationDate": "2023-01-09T12:53:24.490+00:00",
+                    "lastModificationDate": "2023-01-09T12:53:24.490+00:00",
+                    "active": true,
+                    "actionType": "MODEL_UPDATE",
+                    "entityType": "MODEL",
+                    "entityId": "0f8e6390-e78c-49c6-9e9a-592e4d59334c",
+                    "message": "Updating Compute",
+                    "actionStatus": "PENDING"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/staging/{staging-model-id}/logs": {
+        "get": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Get Staging Model Logs",
+          "description": "returns the system Logs for a given staging model",
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "staging-model-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 14:35:38 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Transfer-Encoding": {
+                  "schema": {
+                    "type": "string",
+                    "example": "chunked"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "text/plain": {
+                  "schema": {
+                    "type": "string"
+                  },
+                  "example": "2023/01/18 14:22:15 INFO mlflow.models.flavor_backend_registry: Selected backend for flavor 'python_function'\n2023/01/18 14:22:15 INFO mlflow.utils.virtualenv: Installing python 3.9.6 if it does not exist\nDownloading Python-3.9.6.tar.xz...\n-> https://www.python.org/ftp/python/3.9.6/Python-3.9.6.tar.xz\nInstalling Python-3.9.6...\npatching file Misc/NEWS.d/next/Build/2021-10-11-16-27-38.bpo-45405.iSfdW5.rst\npatching file configure\npatching file configure.ac\nInstalled Python-3.9.6 to /root/.pyenv/versions/3.9.6\n2023/01/18 14:24:35 INFO mlflow.utils.virtualenv: Creating a new environment /root/.mlflow/envs/mlflow-5042713a27b818d91c6dba15cd40cfbc8ff9e67d\ncreated virtual environment CPython3.9.6.final.0-64 in 868ms\n  creator CPython3Posix(dest=/root/.mlflow/envs/mlflow-5042713a27b818d91c6dba15cd40cfbc8ff9e67d, clear=False, no_vcs_ignore=False, global=False)\n  seeder FromAppData(download=False, pip=bundle, setuptools=bundle, wheel=bundle, via=copy, app_data_dir=/root/.local/share/virtualenv)\n    added seed packages: pip==22.3.1, setuptools==65.6.3, wheel==0.38.4\n  activators BashActivator,CShellActivator,FishActivator,NushellActivator,PowerShellActivator,PythonActivator\n2023/01/18 14:24:36 INFO mlflow.utils.virtualenv: Installing dependencies\n2023/01/18 14:24:50 [error] 11#11: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.31.37.180, server: , request: \"GET /health HTTP/1.1\", upstream: \"http://127.0.0.1:5000/health\", host: \"172.31.42.83:80\"\n172.31.37.180 - - [18/Jan/2023:14:24:50 +0000] \"GET /health HTTP/1.1\" 502 163 \"-\" \"kube-probe/1.23+\"\n2023/01/18 14:24:53 [error] 11#11: *3 connect() failed (111: Connection refused) while connecting to upstream, client: 172.31.37.180, server: , request: \"GET /health HTTP/1.1\", upstream: \"http://127.0.0.1:5000/health\", host: \"172.31.42.83:80\"\n172.31.37.180 - - [18/Jan/2023:14:24:53 +0000] \"GET /health HTTP/1.1\" 502 163 \"-\" \"kube-probe/1.23+\"\n2023/01/18 14:25:20 [error] 11#11: *5 connect() failed (111: Connection refused) while connecting to upstream, client: 172.31.37.180, server: , request: \"GET /health HTTP/1.1\", upstream: \"http://127.0.0.1:5000/health\", host: \"172.31.42.83:80\"\n2023/01/18 14:25:20 [error] 11#11: *6 connect() failed (111: Connection refused) while connecting to upstream, client: 172.31.37.180, server: , request: \"GET /health HTTP/1.1\", upstream: \"http://127.0.0.1:5000/health\", host: \"172.31.42.83:80\"\n172.31.37.180 - - [18/Jan/2023:14:25:20 +0000] \"GET /health HTTP/1.1\" 502 163 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:25:20 +0000] \"GET /health HTTP/1.1\" 502 163 \"-\" \"kube-probe/1.23+\"\n2023/01/18 14:25:30 [error] 11#11: *9 connect() failed (111: Connection refused) while connecting to upstream, client: 172.31.37.180, server: , request: \"GET /health HTTP/1.1\", upstream: \"http://127.0.0.1:5000/health\", host: \"172.31.42.83:80\"\n172.31.37.180 - - [18/Jan/2023:14:25:30 +0000] \"GET /health HTTP/1.1\" 502 163 \"-\" \"kube-probe/1.23+\"\n2023/01/18 14:25:35 INFO mlflow.utils.environment: === Running command '['bash', '-c', 'source /root/.mlflow/envs/mlflow-5042713a27b818d91c6dba15cd40cfbc8ff9e67d/bin/activate && python -c \"\"']'\n2023/01/18 14:25:35 INFO mlflow.utils.environment: === Running command '['bash', '-c', 'source /root/.mlflow/envs/mlflow-5042713a27b818d91c6dba15cd40cfbc8ff9e67d/bin/activate && exec gunicorn --timeout=60 -b 0.0.0.0:5000 -w 1 ${GUNICORN_CMD_ARGS} -- mlflow.pyfunc.scoring_server.wsgi:app']'\n[2023-01-18 14:25:36 +0000] [12881] [INFO] Starting gunicorn 20.1.0\n[2023-01-18 14:25:36 +0000] [12881] [INFO] Listening at: http://0.0.0.0:5000 (12881)\n[2023-01-18 14:25:36 +0000] [12881] [INFO] Using worker: sync\n[2023-01-18 14:25:36 +0000] [12884] [INFO] Booting worker with pid: 12884\n172.31.37.180 - - [18/Jan/2023:14:25:40 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:25:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:25:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:26:00 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:26:10 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:26:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:26:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:26:30 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:26:40 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:26:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:26:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:27:00 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:27:10 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:27:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:27:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:27:30 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:27:40 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:27:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:27:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:28:00 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:28:10 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:28:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:28:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:28:30 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:28:40 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:28:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:28:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:29:00 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:29:10 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:29:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:29:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:29:30 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:29:40 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:29:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:29:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:30:00 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:30:10 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:30:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:30:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:30:30 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:30:40 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:30:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:30:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:31:00 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:31:10 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:31:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:31:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:31:30 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:31:40 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:31:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:31:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:32:00 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:32:10 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:32:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:32:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:32:30 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:32:40 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:32:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:32:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:33:00 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:33:10 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:33:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:33:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:33:30 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:33:40 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:33:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:33:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:34:00 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:34:10 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:34:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:34:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:34:30 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:34:40 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:34:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:34:50 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:35:00 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:35:10 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:35:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:35:20 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.37.180 - - [18/Jan/2023:14:35:30 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n"
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/{staging-model-id}/stop": {
+        "put": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Stop Staging Model",
+          "description": "Stop a staging model",
+          "requestBody": {
+            "content": {}
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "staging-model-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 14:36:50 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "310"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "id": "c838cd9a-1f9a-4bfc-be95-d55759d18c1b",
+                    "creationDate": "2023-01-18T14:36:50.404+00:00",
+                    "lastModificationDate": "2023-01-18T14:36:50.404+00:00",
+                    "active": true,
+                    "actionType": "MODEL_STOP",
+                    "entityType": "MODEL",
+                    "entityId": "6ea807a7-e5b6-4242-ad66-ef4af9a6a0f1",
+                    "message": "Stopping model",
+                    "actionStatus": "PENDING"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/{staging-model-id}/start": {
+        "put": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Start Staging Model",
+          "description": "Start a staging model",
+          "requestBody": {
+            "content": {}
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "staging-model-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 14:37:36 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "311"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "id": "72be0e0f-2153-4080-8e48-623e76caebbb",
+                    "creationDate": "2023-01-18T14:37:35.951+00:00",
+                    "lastModificationDate": "2023-01-18T14:37:35.951+00:00",
+                    "active": true,
+                    "actionType": "MODEL_START",
+                    "entityType": "MODEL",
+                    "entityId": "6ea807a7-e5b6-4242-ad66-ef4af9a6a0f1",
+                    "message": "Starting model",
+                    "actionStatus": "PENDING"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/tags/{model-version-id}": {
+        "post": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Add Tag",
+          "description": "Adds new tag in key:value pair for a model version\n\n---\n\nThis API allows you to add a new tag to a specific model deployment. The tag is added to the model deployment identified by the `deploymentVersionId` path parameter.\n\nBody Parameters:\n\n- key: string, Required. The key of the tag.\n- value: string, Required. The value of the tag.\n    \n\nResponse:\n\n- key: string, The key of the added tag.\n- value: string, The value of the added tag.",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "key": "Company",
+                    "value": "RocketML"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "model-version-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "36"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Fri, 13 Jan 2023 05:46:57 GMT"
+                  }
+                },
+                "Keep-Alive": {
+                  "schema": {
+                    "type": "string",
+                    "example": "timeout=60"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "key": "Company",
+                    "value": "RocketML"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Update Tag",
+          "description": "Update key,value tag for a model version\n\n---\n\nDescription: This API allows you to update the tag of a specific deployment version.\n\nBody:\n\n- key: (string) key of the tag\n- value: (string) value of the tag\n    \n\nResponse:\n\n- key: (string) key of the tag\n- value: (string) value of the tag",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "key": "Company",
+                    "value": "RocketML"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "model-version-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "36"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Fri, 13 Jan 2023 05:47:33 GMT"
+                  }
+                },
+                "Keep-Alive": {
+                  "schema": {
+                    "type": "string",
+                    "example": "timeout=60"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "key": "Company",
+                    "value": "RocketML"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Delete Tag",
+          "description": "Delete key,value tag for a model version\n\n---\n\nBody Parameters:\n\n- key (string): The key of the tag to be deleted\n- value (string): The value of the tag to be deleted\n    \n\nResponse:\n\n- No response body is returned for this request",
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "model-version-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "No Content",
+              "headers": {
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Fri, 13 Jan 2023 05:47:43 GMT"
+                  }
+                },
+                "Keep-Alive": {
+                  "schema": {
+                    "type": "string",
+                    "example": "timeout=60"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                }
+              },
+              "content": {
+                "text/plain": {
+                  "schema": {
+                    "type": "string"
+                  },
+                  "example": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/notes/{model-version-id}": {
+        "put": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Update Notes",
+          "description": "Update notes for a model version",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "note": "XGBoost, which stands for Extreme Gradient Boosting, is a scalable, distributed gradient-boosted decision tree (GBDT) machine learning library. It provides parallel tree boosting and is the leading machine learning library for regression, classification, and ranking problems."
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "model-version-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 14:10:29 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "447"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "id": "0b993a6e-9e57-4e87-ab70-e1f6e3bdf8a0",
+                    "creationDate": "2023-01-18T14:10:29.897+00:00",
+                    "lastModificationDate": "2023-01-18T14:10:29.897+00:00",
+                    "active": true,
+                    "note": "XGBoost, which stands for Extreme Gradient Boosting, is a scalable, distributed gradient-boosted decision tree (GBDT) machine learning library. It provides parallel tree boosting and is the leading machine learning library for regression, classification, and ranking problems."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/prod/{model-version-id}": {
+        "post": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Promote to Production",
+          "description": "Promote a model to production\n\n#### Request Payload\n\n- `minPod` (int): Minimum number of pods to be used for the model\n- `maxPod` (int): Maximum number of pods to be used for the model\n- `cpuUtilization` (int): CPU utilization percentage for the model\n- `memoryUtilization` (int): Memory utilization percentage for the model\n- `computeId` (string): ID of the compute resource to be used for the model\n    \n\n#### Response Payload\n\n- `actionType` (string): Type of action performed\n- `entityType` (string): Type of entity affected\n- `entityId` (string): ID of the affected entity\n- `message` (string): Description of the action performed\n- `actionStatus` (string): Status of the action performed",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "minPod": 1,
+                    "maxPod": 2,
+                    "cpuUtilization": 70,
+                    "memoryUtilization": 80,
+                    "computeId": "eef59f03-a872-4988-9ad0-06a150215dbb"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "model-version-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Created",
+              "headers": {
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "321"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Fri, 06 Jan 2023 10:08:44 GMT"
+                  }
+                },
+                "Keep-Alive": {
+                  "schema": {
+                    "type": "string",
+                    "example": "timeout=60"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "id": "f6350b5a-5f1a-4f74-8646-58d35e32071c",
+                    "creationDate": "2023-01-06T10:08:44.968+00:00",
+                    "lastModificationDate": "2023-01-06T10:08:44.968+00:00",
+                    "active": true,
+                    "actionType": "PROD_MODEL_CREATE",
+                    "entityType": "PRODMODEL",
+                    "entityId": "b188c07b-466f-420b-98b4-d68af18a0aec",
+                    "message": "Starting model",
+                    "actionStatus": "PENDING"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/prod": {
+        "get": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Load Production Models",
+          "description": "This request endpoint provides information about all the Production Models in the system. API access is restricted to users with Admin access to the system.\n\n---\n\n**Response Fields:**\n\n- `id`: Production Model ID.\n- `versionId`: Model Version ID.\n- `modelName`: The name of the model deployment.\n- `version`: Model Version Name.\n- `modelPath`: Storage path of the model artifacts.\n- `url`: Production Model Endpoint.\n- `status`: Production Model status - `ON`, `OFF`, `STARTING`, `STOPPING` or `FAILED`.\n- `deploymentName`: Name of the deployment in Kubernetes Cluster.\n- `minPod`: Minimum number of application instances.\n- `maxPod`: Maximum number of application instances.\n- `cpuUtilization`: Target CPU Utilization % value. Average CPU Utilization above this value will trigger application scaling.\n- `memoryUtilization`: Target Memory Utilization % value. Average Memory Utilization above this value will trigger application scaling.\n- `threadsPerWorker`: Number of threads to help parallel processing within a Gunicorn Worker.\n- `workersCount`: Number of Gunicorn Workers.\n- `tags`: Label - Key:Value Pair.",
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Created",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Thu, 19 Jan 2023 10:37:23 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "765"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string",
+                    "example": "JSESSIONID=1B474562D6FAB814F74CF27246D450D2; Path=/; HttpOnly"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": [
+                    {
+                      "id": "7886c99d-9131-4117-b46f-2576b50998e3",
+                      "creationDate": "2023-01-18T14:10:54.614+00:00",
+                      "lastModificationDate": "2023-01-19T08:43:25.991+00:00",
+                      "active": true,
+                      "versionId": "a252ea5f-737a-4b4b-aca2-22d518bf15a0",
+                      "modelName": "xgboost-model",
+                      "version": "1",
+                      "modelPath": "s3://rml-model-artifacts/admin/tesla/1/83c54411e7854ff4832e3b366a82db52/artifacts/model/",
+                      "url": "https://xgboost-model-j1yf.ostack.babyrocket.net/invocations",
+                      "status": "ON",
+                      "deploymentName": "xgboost-model-j1yf",
+                      "lastStartTime": "2023-01-19T08:43:25.981+00:00",
+                      "minPod": 1,
+                      "maxPod": 2,
+                      "cpuUtilization": 70,
+                      "memoryUtilization": 70,
+                      "threadsPerWorker": 1,
+                      "workersCount": 1,
+                      "tags": {
+                        "Company": "RocketML-Temp3",
+                        "Customer": "Accertify",
+                        "HierarchId": "52658945689152365874",
+                        "Company2": "RocketML-Updated-2nd time"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/prod/scale": {
+        "put": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Update Scaling Policy",
+          "description": "Update scaling policy for a production model.\n\n---\n\nThe request body contains the following fields:\n\n- id: The id of the scaling policy.\n- minPod: The minimum number of pods to be maintained.\n- maxPod: The maximum number of pods to be maintained.\n- cpuUtilization: The target CPU utilization percentage.\n- memoryUtilization: The target memory utilization percentage.\n- compute: An object containing the id of the compute resource.\n- workersCount: Number of worker to be used.\n- threadsPerWorker: Number of threads per worker\n    \n\nThe response contains a JSON object with the updated scaling policy.  \nIt includes fields like status, deploymentName, lastStartTime, minPod, maxPod, cpuUtilization, memoryUtilization, transformationEnabled, compute, computeId, threadsPerWorker, workersCount.",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "example": {
+                    "id": "7886c99d-9131-4117-b46f-2576b50998e3",
+                    "minPod": 1,
+                    "maxPod": 2,
+                    "cpuUtilization": 70,
+                    "memoryUtilization": 70,
+                    "compute": {
+                      "id": "eef59f07-a872-4988-9ad0-06a150215dbb"
+                    },
+                    "workersCount": 1,
+                    "threadsPerWorker": 1
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 17:18:54 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "701"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Set-Cookie": {
+                  "schema": {
+                    "type": "string",
+                    "example": "JSESSIONID=2CF7B455403EAC9C3F0BB8EC120266EC; Path=/; HttpOnly"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "id": "7886c99d-9131-4117-b46f-2576b50998e3",
+                    "creationDate": "2023-01-18T14:10:54.614+00:00",
+                    "lastModificationDate": "2023-01-18T14:56:25.836+00:00",
+                    "active": true,
+                    "modelPath": "s3://rml-model-artifacts/admin/tesla/1/83c54411e7854ff4832e3b366a82db52/artifacts/model/",
+                    "url": "https://xgboost-model-j1yf.ostack.babyrocket.net/invocations",
+                    "status": "ON",
+                    "deploymentName": "xgboost-model-j1yf",
+                    "lastStartTime": "2023-01-18T14:56:25.830+00:00",
+                    "minPod": 1,
+                    "maxPod": 2,
+                    "cpuUtilization": 70,
+                    "memoryUtilization": 70,
+                    "transformationEnabled": false,
+                    "compute": {
+                      "id": "eef59f07-a872-4988-9ad0-06a150215dbb",
+                      "active": true,
+                      "name": "4C-16GB",
+                      "cpus": 4,
+                      "memory": 16384,
+                      "gpus": 0,
+                      "enabled": true
+                    },
+                    "threadsPerWorker": 1,
+                    "workersCount": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/prod/{production-model-id}/stop": {
+        "put": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Stop Production Model",
+          "description": "Stop a production model",
+          "requestBody": {
+            "content": {}
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "production-model-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 14:48:15 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "319"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "id": "48a1f90b-d576-4eec-bf16-c927fc947354",
+                    "creationDate": "2023-01-18T14:48:15.033+00:00",
+                    "lastModificationDate": "2023-01-18T14:48:15.033+00:00",
+                    "active": true,
+                    "actionType": "PROD_MODEL_STOP",
+                    "entityType": "PRODMODEL",
+                    "entityId": "7886c99d-9131-4117-b46f-2576b50998e3",
+                    "message": "Stopping model",
+                    "actionStatus": "PENDING"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/prod/{production-model-id}/start": {
+        "put": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Start Production Model",
+          "description": "Start a production model",
+          "requestBody": {
+            "content": {}
+          },
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "production-model-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 14:50:57 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "320"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object"
+                  },
+                  "example": {
+                    "id": "d08f1745-79f6-421c-baf2-869f88235ac8",
+                    "creationDate": "2023-01-18T14:50:57.468+00:00",
+                    "lastModificationDate": "2023-01-18T14:50:57.468+00:00",
+                    "active": true,
+                    "actionType": "PROD_MODEL_START",
+                    "entityType": "PRODMODEL",
+                    "entityId": "7886c99d-9131-4117-b46f-2576b50998e3",
+                    "message": "Starting model",
+                    "actionStatus": "PENDING"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/model-deployment/prod/{production-model-id}/logs": {
+        "get": {
+          "tags": [
+            "default"
+          ],
+          "summary": "Get Production Model Logs",
+          "description": "Get logs for a production model",
+          "security": [
+            {
+              "basicAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "production-model-id",
+              "in": "path",
+              "schema": {
+                "type": "string"
+              },
+              "required": true
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "headers": {
+                "Server": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nginx/1.23.1"
+                  }
+                },
+                "Date": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Wed, 18 Jan 2023 14:57:07 GMT"
+                  }
+                },
+                "Content-Type": {
+                  "schema": {
+                    "type": "string",
+                    "example": "application/json;charset=UTF-8"
+                  }
+                },
+                "Content-Length": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "3469"
+                  }
+                },
+                "Connection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "keep-alive"
+                  }
+                },
+                "Vary": {
+                  "schema": {
+                    "type": "string",
+                    "example": "Access-Control-Request-Headers"
+                  }
+                },
+                "Access-Control-Allow-Credentials": {
+                  "schema": {
+                    "type": "boolean",
+                    "example": "true"
+                  }
+                },
+                "Access-Control-Allow-Methods": {
+                  "schema": {
+                    "type": "string",
+                    "example": "GET, POST, DELETE, PUT, OPTIONS"
+                  }
+                },
+                "Access-Control-Allow-Headers": {
+                  "schema": {
+                    "type": "string",
+                    "example": "X-Requested-With, Content-Type, Access-Control-Allow-Methods, Access-Control-Allow-Headers, Access-Control-Allow-Origin, Authorization"
+                  }
+                },
+                "X-Content-Type-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "nosniff"
+                  }
+                },
+                "X-XSS-Protection": {
+                  "schema": {
+                    "type": "string",
+                    "example": "1; mode=block"
+                  }
+                },
+                "Cache-Control": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache, no-store, max-age=0, must-revalidate"
+                  }
+                },
+                "Pragma": {
+                  "schema": {
+                    "type": "string",
+                    "example": "no-cache"
+                  }
+                },
+                "Expires": {
+                  "schema": {
+                    "type": "integer",
+                    "example": "0"
+                  }
+                },
+                "X-Frame-Options": {
+                  "schema": {
+                    "type": "string",
+                    "example": "DENY"
+                  }
+                }
+              },
+              "content": {
+                "text/plain": {
+                  "schema": {
+                    "type": "string"
+                  },
+                  "example": "2023/01/18 14:53:55 INFO mlflow.models.flavor_backend_registry: Selected backend for flavor 'python_function'\n2023/01/18 14:53:55 INFO mlflow.utils.virtualenv: Installing python 3.9.6 if it does not exist\nDownloading Python-3.9.6.tar.xz...\n-> https://www.python.org/ftp/python/3.9.6/Python-3.9.6.tar.xz\nInstalling Python-3.9.6...\npatching file Misc/NEWS.d/next/Build/2021-10-11-16-27-38.bpo-45405.iSfdW5.rst\npatching file configure\npatching file configure.ac\n2023/01/18 14:54:12 [error] 11#11: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.31.30.171, server: , request: \"GET /metrics HTTP/1.1\", upstream: \"http://127.0.0.1:5000/metrics\", host: \"172.31.27.50:80\"\n172.31.30.171 - - [18/Jan/2023:14:54:12 +0000] \"GET /metrics HTTP/1.1\" 502 163 \"-\" \"Prometheus/2.41.0\"\n2023/01/18 14:55:12 [error] 11#11: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.31.30.171, server: , request: \"GET /metrics HTTP/1.1\", upstream: \"http://127.0.0.1:5000/metrics\", host: \"172.31.27.50:80\"\n172.31.30.171 - - [18/Jan/2023:14:55:12 +0000] \"GET /metrics HTTP/1.1\" 502 163 \"-\" \"Prometheus/2.41.0\"\nInstalled Python-3.9.6 to /root/.pyenv/versions/3.9.6\n2023/01/18 14:55:32 INFO mlflow.utils.virtualenv: Creating a new environment /root/.mlflow/envs/mlflow-5042713a27b818d91c6dba15cd40cfbc8ff9e67d\ncreated virtual environment CPython3.9.6.final.0-64 in 615ms\n  creator CPython3Posix(dest=/root/.mlflow/envs/mlflow-5042713a27b818d91c6dba15cd40cfbc8ff9e67d, clear=False, no_vcs_ignore=False, global=False)\n  seeder FromAppData(download=False, pip=bundle, setuptools=bundle, wheel=bundle, via=copy, app_data_dir=/root/.local/share/virtualenv)\n    added seed packages: pip==22.3.1, setuptools==65.6.3, wheel==0.38.4\n  activators BashActivator,CShellActivator,FishActivator,NushellActivator,PowerShellActivator,PythonActivator\n2023/01/18 14:55:33 INFO mlflow.utils.virtualenv: Installing dependencies\n2023/01/18 14:56:12 [error] 11#11: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.31.30.171, server: , request: \"GET /metrics HTTP/1.1\", upstream: \"http://127.0.0.1:5000/metrics\", host: \"172.31.27.50:80\"\n172.31.30.171 - - [18/Jan/2023:14:56:12 +0000] \"GET /metrics HTTP/1.1\" 502 163 \"-\" \"Prometheus/2.41.0\"\n2023/01/18 14:56:17 INFO mlflow.utils.environment: === Running command '['bash', '-c', 'source /root/.mlflow/envs/mlflow-5042713a27b818d91c6dba15cd40cfbc8ff9e67d/bin/activate && python -c \"\"']'\n2023/01/18 14:56:17 INFO mlflow.utils.environment: === Running command '['bash', '-c', 'source /root/.mlflow/envs/mlflow-5042713a27b818d91c6dba15cd40cfbc8ff9e67d/bin/activate && exec gunicorn --timeout=60 -b 0.0.0.0:5000 -w 1 ${GUNICORN_CMD_ARGS} -- mlflow.pyfunc.scoring_server.wsgi:app']'\n[2023-01-18 14:56:17 +0000] [12905] [INFO] Starting gunicorn 20.1.0\n[2023-01-18 14:56:17 +0000] [12905] [INFO] Listening at: http://0.0.0.0:5000 (12905)\n[2023-01-18 14:56:17 +0000] [12905] [INFO] Using worker: sync\n[2023-01-18 14:56:17 +0000] [12908] [INFO] Booting worker with pid: 12908\n172.31.17.159 - - [18/Jan/2023:14:56:24 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.17.159 - - [18/Jan/2023:14:56:45 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.17.159 - - [18/Jan/2023:14:56:55 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n172.31.17.159 - - [18/Jan/2023:14:57:05 +0000] \"GET /health HTTP/1.1\" 200 1 \"-\" \"kube-probe/1.23+\"\n"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
